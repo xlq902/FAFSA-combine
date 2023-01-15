@@ -1,43 +1,69 @@
-﻿// Created by Eric Yang for the University of Connecticut, 2022
+﻿// Created by Eric Yang for the University of Connecticut, 2022 - 2023
 
 using System.IO;
 
-string working = "C:\\Users\\tetrg\\OneDrive\\Documents\\Personal\\Marine Research\\Rhoptry Proteins\\ROP18";
-Directory.SetCurrentDirectory(working);
-string[] dirs = Directory.GetDirectories(working);
-
-if (!File.Exists(working + "\\combex\\" + "compfa-ROP18.fasta"))
+namespace Program
 {
-    var i = File.Create(working + "\\combex\\" + "compfa-ROP18.fasta");
-    i.Close();
-}
-
-foreach (string dir in dirs)
-{
-    try
+    class Program
     {
-        Directory.SetCurrentDirectory(dir);
-        string[] dirs2 = Directory.GetFiles(dir);
-
-        foreach (string dir2 in dirs2)
+        public static void tree(string directoryToScan, string working2, string resp)
         {
-            if (dir2.EndsWith(".fasta") || dir2.EndsWith(".fa"))
+            string[] allFolders = Directory.GetDirectories(directoryToScan);
+            string[] allFiles = Directory.GetFiles(directoryToScan);
+            foreach (string file in allFiles) 
             {
-                bool a = dir2.Equals(working + "\\combex\\" + "compfa-ROP18.fasta");
-                if (!a)
+                if (!file.Contains(working2))
                 {
-                    string h = File.ReadAllText(dir2);
-                    string cleaned = h.TrimEnd('\r', '\n');
-                    File.AppendAllText(working + "\\combex\\" + "compfa-ROP18.fasta", cleaned + Environment.NewLine);
+                    if (file.EndsWith(".fasta") || file.EndsWith(".fa"))
+                    {
+                        bool a = file.Equals(working2);
+                        if (!a)
+                        {
+                            string h = File.ReadAllText(file);
+                            string cleaned = h.TrimEnd('\r', '\n');
+                            File.AppendAllText(working2, cleaned + Environment.NewLine);
+                        }
+                        Console.WriteLine("Completed directory " + file);
+                    }
                 }
-                Console.WriteLine("Completed directory " + dir);
+                else
+                {
+                    Console.WriteLine("Skipped directory " + working2);
+                }
+            }
+            foreach (string folder in allFolders)
+            {
+                tree(folder, working2, resp);
             }
         }
-    }
-    catch
-    {
-        Console.WriteLine("Unknown error occurred in directory " + dir);
+        public static void Main()
+        {
+            Console.WriteLine("What do you want your end file to be named? Do not include file extensions.");
+            string resp = Console.ReadLine();
+            while (resp != null)
+            {
+                Console.WriteLine("In what directory do you want to scan?");
+                string working = Console.ReadLine();
+                while (working != null)
+                {
+                    Directory.SetCurrentDirectory(working);
+                    string working2 = working + "\\combex\\" + resp + ".fa";
+                    if (!File.Exists(working2))
+                    {
+                        if (!Directory.Exists(working + "\\combex\\"))
+                        {
+                            Directory.CreateDirectory(working + "\\combex\\");
+                        }
+                        var i = File.Create(working2);
+                        i.Close();
+                    }
+                    tree(working, working2, resp);
+                    Console.WriteLine("All directories completed.");
+                    break;
+                }
+                break;
+            }
+
+        }
     }
 }
-
-Console.WriteLine("All directories completed.");
