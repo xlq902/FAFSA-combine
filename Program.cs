@@ -1,5 +1,3 @@
-﻿// Created by Eric Yang for the University of Connecticut, 2022 - 2023
-
 using System.IO;
 
 namespace Program
